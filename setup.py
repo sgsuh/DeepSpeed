@@ -259,11 +259,14 @@ hip_version = "0.0"
 if torch_available and torch.version.cuda is not None:
     cuda_version = ".".join(torch.version.cuda.split('.')[:2])
     if sys.platform != "win32":
-        if isinstance(torch.cuda.nccl.version(), int):
-            # This will break if minor version > 9.
-            nccl_version = ".".join(str(torch.cuda.nccl.version())[:2])
+        if hasattr(torch._C, "_nccl_version"):
+            if isinstance(torch.cuda.nccl.version(), int):
+                # This will break if minor version > 9.
+                nccl_version = ".".join(str(torch.cuda.nccl.version())[:2])
+            else:
+                nccl_version = ".".join(map(str, torch.cuda.nccl.version()[:2]))
         else:
-            nccl_version = ".".join(map(str, torch.cuda.nccl.version()[:2]))
+            nccl_version = None
     if hasattr(torch.cuda, 'is_bf16_supported') and torch.cuda.is_available():
         bf16_support = torch.cuda.is_bf16_supported()
 if torch_available and hasattr(torch.version, 'hip') and torch.version.hip is not None:
